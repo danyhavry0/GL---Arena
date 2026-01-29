@@ -43,7 +43,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
         <div className="text-center">
           <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
           <p className="text-sm text-muted-foreground">
@@ -55,36 +55,42 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="mb-8"
       >
-        <div className="mb-2">
-          <h1 className="text-3xl font-bold text-foreground tracking-tight mb-4">
-            Dashboard
-          </h1>
-        </div>
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="relative w-full h-64 md:h-80 lg:h-96 rounded-lg overflow-hidden"
+          className="relative w-full h-[28rem] md:h-[36rem] lg:h-[44rem] rounded-lg overflow-hidden bg-muted"
         >
+          {/* Background blur dell'immagine per riempire tutti gli spazi - più intenso */}
           <Image
-            src="/banner.jpg"
+            src="/images/banner4.jpg"
+            alt="GL-Arena Banner Background"
+            fill
+            className="object-cover blur-3xl opacity-50 scale-125"
+            priority
+            sizes="100vw"
+            aria-hidden="true"
+          />
+          {/* Immagine principale */}
+          <Image
+            src="/images/banner4.jpg"
             alt="GL-Arena Banner"
             fill
-            className="object-cover"
+            className="object-cover object-center relative z-10"
             priority
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
+            sizes="100vw"
           />
-          {/* Fade effect sui lati */}
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background" />
-          {/* Fade effect in alto e basso (opzionale, più leggero) */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/40" />
+          {/* Gradient metallico uniforme su tutti i lati (orizzontale) */}
+          <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/70 z-20 pointer-events-none" />
+          {/* Gradient metallico uniforme su tutti i lati (verticale) */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background/70 z-20 pointer-events-none" />
           
           {/* Testo overlay */}
           <div className="absolute inset-0 flex items-center justify-center z-10">
@@ -105,93 +111,82 @@ export default function DashboardPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
               >
-                <Button
-                  size="lg"
-                  variant="gaming"
-                  className="px-10 py-3 text-base md:text-lg font-semibold shadow-md"
+                <button
                   onClick={() => {
                     // TODO: Implementare prenotazione ticket
                     console.log("Prenota ticket clicked");
                   }}
+                  className="px-8 py-3 text-base md:text-lg font-medium text-foreground border-2 border-primary/60 bg-background/20 backdrop-blur-sm rounded-md hover:border-primary hover:bg-primary/10 transition-all"
                 >
                   Prenota Ticket
-                </Button>
+                </button>
               </motion.div>
             </motion.div>
           </div>
         </motion.div>
       </motion.div>
 
-      {/* User Info Card */}
+      {/* Sezione Tornei */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
         className="mb-8"
       >
-        <Card className="border-border hover:border-primary/40 transition-colors metallic-border">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg font-medium">
-              <User className="w-5 h-5 text-primary" />
-              Informazioni Account
-            </CardTitle>
+        <Card className="border-border metallic-border">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg bg-primary/10">
+                  <Trophy className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl font-semibold">Tornei</CardTitle>
+                  <CardDescription className="text-base mt-1">
+                    Visualizza e partecipa ai tornei disponibili
+                  </CardDescription>
+                </div>
+              </div>
+              <Link href="/dashboard/tournaments">
+                <Button variant="outline" size="sm">
+                  Vedi tutti
+                </Button>
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div>
-                <span className="text-sm font-medium text-muted-foreground">
-                  Email:
-                </span>
-                <p className="text-sm font-semibold text-foreground mt-1">
-                  {user?.email}
-                </p>
-              </div>
-              {userData?.username && (
-                <div>
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Username:
-                  </span>
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-sm font-semibold text-foreground">
-                      {userData.username}
-                    </p>
-                    <Badge variant="secondary">Player</Badge>
-                  </div>
-                </div>
-              )}
-              {userData?.full_name && (
-                <div>
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Nome completo:
-                  </span>
-                  <p className="text-sm font-semibold text-foreground mt-1">
-                    {userData.full_name}
-                  </p>
-                </div>
-              )}
+            <div className="text-center py-12">
+              <Trophy className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+              <p className="text-muted-foreground text-lg">
+                Nessun torneo disponibile al momento
+              </p>
+              <p className="text-muted-foreground/70 text-sm mt-2">
+                I nuovi tornei verranno visualizzati qui
+              </p>
             </div>
           </CardContent>
         </Card>
       </motion.div>
 
       {/* Quick Actions */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2">
+
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <Link href="/dashboard/tournaments">
-            <Card className="h-full border-border hover:border-primary/40 hover:shadow-md transition-all cursor-pointer group metallic-border">
+          <Link href="/dashboard/profile">
+            <Card className="h-full border-border hover:border-secondary/40 hover:shadow-md transition-all cursor-pointer group metallic-border">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/15 transition-colors">
-                    <Trophy className="w-5 h-5 text-primary" />
+                  <div className="p-2.5 rounded-lg bg-secondary/10 group-hover:bg-secondary/15 transition-colors">
+                    <User className="w-5 h-5 text-secondary" />
                   </div>
-                  <CardTitle className="text-lg font-medium">Tornei</CardTitle>
+                  <CardTitle className="text-lg font-medium">Profilo</CardTitle>
                 </div>
                 <CardDescription className="text-sm text-muted-foreground">
-                  Visualizza e partecipa ai tornei disponibili
+                  Gestisci il tuo profilo e le impostazioni
                 </CardDescription>
               </CardHeader>
             </Card>
