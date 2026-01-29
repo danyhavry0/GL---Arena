@@ -8,8 +8,11 @@ import { supabase } from "@/lib/supabaseClient";
 import { normalizeEmail } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "@/contexts/LocaleContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
@@ -98,9 +101,9 @@ export default function LoginPage() {
 
       // Mostra messaggio appropriato in base allo stato della conferma email
       if (body.requiresEmailConfirmation) {
-        setSuccess("Registration successful! Please check your email to confirm your account before signing in.");
+        setSuccess("login.successConfirmEmail");
       } else {
-        setSuccess("Registration completed. You can now sign in.");
+        setSuccess("login.successRegistered");
       }
       
       setRegisterUsername("");
@@ -118,7 +121,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background font-sans">
+    <div className="flex min-h-screen items-center justify-center bg-background font-sans relative">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <motion.main
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -129,35 +135,35 @@ export default function LoginPage() {
           <CardHeader className="text-center space-y-3">
             <div className="flex items-center justify-center gap-3">
               <Trophy className="w-7 h-7 text-primary" />
-              <CardTitle className="text-2xl font-semibold tracking-tight">GL-Arena</CardTitle>
+              <CardTitle className="text-2xl font-semibold tracking-tight">{t("login.title")}</CardTitle>
             </div>
             <CardDescription>
-              Sign in to the competitive platform for esports tournaments
+              {t("login.subtitle")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
 
             <label className="flex flex-col gap-1 text-sm font-medium">
-              Email or username
+              {t("login.emailOrUsername")}
               <input
                 type="text"
                 autoComplete="username"
                 className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
-                placeholder="you@example.com or username"
+                placeholder={t("login.emailOrUsernamePlaceholder")}
               />
             </label>
 
             <label className="flex flex-col gap-1 text-sm font-medium">
-              Password
+              {t("login.password")}
               <input
                 type="password"
                 autoComplete="current-password"
                 className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder={t("login.passwordPlaceholder")}
               />
             </label>
 
@@ -192,7 +198,7 @@ export default function LoginPage() {
                       disabled={resendingEmail}
                       className="mt-2 text-sm text-primary hover:underline disabled:opacity-50"
                     >
-                      {resendingEmail ? "Sending..." : "Resend confirmation email"}
+                      {resendingEmail ? t("common.sending") : t("common.resendConfirmation")}
                     </button>
                   ) : null;
                 })()}
@@ -200,7 +206,7 @@ export default function LoginPage() {
             )}
             {success && (
               <div className="rounded-md bg-success/10 border border-success/50 p-3">
-                <p className="text-sm text-success">{success}</p>
+                <p className="text-sm text-success">{t(success)}</p>
               </div>
             )}
 
@@ -219,10 +225,10 @@ export default function LoginPage() {
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                   />
-                  Signing in...
+                  {t("common.signingIn")}
                 </>
               ) : (
-                "Sign In"
+                t("common.signIn")
               )}
             </Button>
 
@@ -232,7 +238,7 @@ export default function LoginPage() {
               variant="outline"
               className="w-full"
             >
-              {showRegisterForm ? "Hide registration" : "Create new account"}
+              {showRegisterForm ? t("common.hideRegistration") : t("common.createAccount")}
             </Button>
 
             {showRegisterForm && (
@@ -243,61 +249,61 @@ export default function LoginPage() {
                 className="flex flex-col gap-4 border-t border-border pt-4 mt-4"
               >
                 <h2 className="text-lg font-semibold text-foreground">
-                  New Account Registration
+                  {t("login.newAccountRegistration")}
                 </h2>
 
                 <label className="flex flex-col gap-1 text-sm font-medium">
-                  Username
+                  {t("login.username")}
                   <input
                     type="text"
                     className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                     value={registerUsername}
                     onChange={(e) => setRegisterUsername(e.target.value)}
-                    placeholder="username"
+                    placeholder={t("login.usernamePlaceholder")}
                   />
                 </label>
 
                 <label className="flex flex-col gap-1 text-sm font-medium">
-                  Full name
+                  {t("login.fullName")}
                   <input
                     type="text"
                     className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                     value={registerFullName}
                     onChange={(e) => setRegisterFullName(e.target.value)}
-                    placeholder="Full name"
+                    placeholder={t("login.fullNamePlaceholder")}
                   />
                 </label>
 
                 <label className="flex flex-col gap-1 text-sm font-medium">
-                  Avatar URL
+                  {t("login.avatarUrl")}
                   <input
                     type="url"
                     className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                     value={registerAvatarUrl}
                     onChange={(e) => setRegisterAvatarUrl(e.target.value)}
-                    placeholder="https://example.com/avatar.png"
+                    placeholder={t("login.avatarUrlPlaceholder")}
                   />
                 </label>
 
                 <label className="flex flex-col gap-1 text-sm font-medium">
-                  Email
+                  {t("login.email")}
                   <input
                     type="email"
                     className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                     value={registerEmail}
                     onChange={(e) => setRegisterEmail(e.target.value)}
-                    placeholder="you@example.com"
+                    placeholder={t("login.emailPlaceholder")}
                   />
                 </label>
 
                 <label className="flex flex-col gap-1 text-sm font-medium">
-                  Password
+                  {t("login.password")}
                   <input
                     type="password"
                     className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                     value={registerPassword}
                     onChange={(e) => setRegisterPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder={t("login.passwordPlaceholder")}
                   />
                 </label>
 
@@ -316,10 +322,10 @@ export default function LoginPage() {
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                         className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                       />
-                      Submitting...
+                      {t("common.submitting")}
                     </>
                   ) : (
-                    "Confirm Registration"
+                    t("common.confirmRegistration")
                   )}
                 </Button>
               </motion.div>

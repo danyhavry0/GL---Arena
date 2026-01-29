@@ -15,6 +15,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/contexts/LocaleContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function DashboardLayout({
   children,
@@ -23,6 +25,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -54,8 +57,8 @@ export default function DashboardLayout({
   }, []);
 
   const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
+    { href: "/dashboard", label: t("layout.navDashboard"), icon: LayoutDashboard },
+    { href: "/dashboard/tournaments", label: t("layout.navTournaments"), icon: Trophy },
   ];
 
   const handleLogout = async () => {
@@ -99,40 +102,41 @@ export default function DashboardLayout({
                 })}
               </nav>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none">
                       <User className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium text-foreground">
-                        {userData?.username || user.email?.split("@")[0] || "User"}
+                        {userData?.username || user.email?.split("@")[0] || t("common.user")}
                       </span>
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t("layout.myAccount")}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/dashboard/profile" className="flex items-center cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
-                        <span>Profile Settings</span>
+                        <span>{t("layout.profileSettings")}</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/dashboard/links" className="flex items-center cursor-pointer">
                         <Link2 className="mr-2 h-4 w-4" />
-                        <span>Links</span>
+                        <span>{t("layout.navLinks")}</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleChangePassword} className="cursor-pointer">
                       <Key className="mr-2 h-4 w-4" />
-                      <span>Change Password</span>
+                      <span>{t("layout.changePassword")}</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Logout</span>
+                      <span>{t("layout.logout")}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -140,7 +144,7 @@ export default function DashboardLayout({
                 <Link href="/login" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                   <User className="w-5 h-5 text-muted-foreground" />
                   <span className="text-sm font-medium text-muted-foreground">
-                    Sign In
+                    {t("common.signIn")}
                   </span>
                 </Link>
               )}
@@ -155,7 +159,7 @@ export default function DashboardLayout({
         <footer className="border-t border-border bg-card/50">
           <div className="w-full px-4 py-4 sm:px-6 lg:px-8">
             <p className="text-center text-xs text-muted-foreground">
-              © 2026 GL-Arena. Competitive platform for esports tournaments.
+              {t("layout.footer")}
             </p>
           </div>
         </footer>

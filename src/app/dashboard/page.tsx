@@ -9,8 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import BannerCarousel from "@/components/BannerCarousel";
+import { useTranslation } from "@/contexts/LocaleContext";
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ export default function DashboardPage() {
         <div className="text-center">
           <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
           <p className="text-sm text-muted-foreground">
-            Loading...
+            {t("common.loading")}
           </p>
         </div>
       </div>
@@ -65,7 +67,7 @@ export default function DashboardPage() {
         <div className="relative">
           <BannerCarousel
             images={[
-              { src: "/images/banner.jpg", alt: "GL-Arena Banner" },
+              { src: "/images/banner3.png", alt: "GL-Arena Banner" },
             ]}
             autoPlay={false}
           />
@@ -79,10 +81,10 @@ export default function DashboardPage() {
               className="text-center px-4"
             >
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 drop-shadow-lg">
-                The battle is beginning
+                {t("dashboard.bannerTitle")}
               </h2>
               <p className="text-lg md:text-xl lg:text-2xl text-foreground/90 font-medium drop-shadow-md mb-6">
-                Reserve your spot
+                {t("dashboard.bannerSubtitle")}
               </p>
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -97,7 +99,7 @@ export default function DashboardPage() {
                   }}
                   className="px-8 py-3 text-base md:text-lg font-medium text-foreground border-2 border-primary/60 bg-background/20 backdrop-blur-sm rounded-md hover:border-primary hover:bg-primary/10 transition-all"
                 >
-                  Reserve Ticket
+                  {t("dashboard.reserveTicket")}
                 </button>
               </motion.div>
             </motion.div>
@@ -120,15 +122,15 @@ export default function DashboardPage() {
                   <Trophy className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-semibold">Tournaments</CardTitle>
+                  <CardTitle className="text-2xl font-semibold">{t("dashboard.tournaments")}</CardTitle>
                   <CardDescription className="text-base mt-1">
-                    View and participate in available tournaments
+                    {t("dashboard.tournamentsDescription")}
                   </CardDescription>
                 </div>
               </div>
               <Link href="/dashboard/tournaments">
                 <Button variant="outline" size="sm">
-                  View All
+                  {t("common.viewAll")}
                 </Button>
               </Link>
             </div>
@@ -137,10 +139,10 @@ export default function DashboardPage() {
             <div className="text-center py-12">
               <Trophy className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
               <p className="text-muted-foreground text-lg">
-                No tournaments available at the moment
+                {t("dashboard.noTournaments")}
               </p>
               <p className="text-muted-foreground/70 text-sm mt-2">
-                New tournaments will be displayed here
+                {t("dashboard.newTournamentsHere")}
               </p>
             </div>
           </CardContent>
@@ -162,10 +164,10 @@ export default function DashboardPage() {
                   <div className="p-2.5 rounded-lg bg-secondary/10 group-hover:bg-secondary/15 transition-colors">
                     <User className="w-5 h-5 text-secondary" />
                   </div>
-                  <CardTitle className="text-lg font-medium">Profile</CardTitle>
+                  <CardTitle className="text-lg font-medium">{t("dashboard.profile")}</CardTitle>
                 </div>
                 <CardDescription className="text-sm text-muted-foreground">
-                  Manage your profile and settings
+                  {t("dashboard.profileDescription")}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -184,10 +186,10 @@ export default function DashboardPage() {
                   <div className="p-2.5 rounded-lg bg-secondary/10 group-hover:bg-secondary/15 transition-colors">
                     <User className="w-5 h-5 text-secondary" />
                   </div>
-                  <CardTitle className="text-lg font-medium">Profile</CardTitle>
+                  <CardTitle className="text-lg font-medium">{t("dashboard.profile")}</CardTitle>
                 </div>
                 <CardDescription className="text-sm text-muted-foreground">
-                  Manage your profile and settings
+                  {t("dashboard.profileDescription")}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -205,10 +207,10 @@ export default function DashboardPage() {
                 <div className="p-2.5 rounded-lg bg-muted">
                   <BarChart3 className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <CardTitle className="text-lg font-medium text-muted-foreground">Statistics</CardTitle>
+                <CardTitle className="text-lg font-medium text-muted-foreground">{t("dashboard.statistics")}</CardTitle>
               </div>
               <CardDescription className="text-sm text-muted-foreground">
-                Your game statistics (coming soon)
+                {t("dashboard.statisticsDescription")}
               </CardDescription>
             </CardHeader>
           </Card>

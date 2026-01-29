@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useTranslation } from "@/contexts/LocaleContext";
 
 type PlatformId = "riot";
 
@@ -16,7 +17,7 @@ type Platform = {
   id: PlatformId;
   name: string;
   tagline?: string;
-  description: string;
+  descriptionKey: string;
   iconSrc: string;
   accent: string;
   bgGradient: string;
@@ -27,6 +28,7 @@ type Platform = {
 };
 
 export default function LinksPage() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState<PlatformId | null>(null);
@@ -47,7 +49,7 @@ export default function LinksPage() {
       id: "riot",
       name: "Riot Games",
       tagline: "League of Legends",
-      description: "Link your Summoner account (name & PUUID) for tournaments, match validation, and bracket registration.",
+      descriptionKey: "links.riotDescription",
       iconSrc: "/images/riot-icon.jpg",
       accent: "from-red-600 to-red-800",
       bgGradient: "from-red-500/10 via-transparent to-red-600/5",
@@ -63,7 +65,7 @@ export default function LinksPage() {
       await new Promise((r) => setTimeout(r, 800));
       setPlatforms((prev) =>
         prev.map((p) =>
-          p.id === id ? { ...p, connected: true, accountLabel: "Account linked (placeholder)" } : p
+          p.id === id ? { ...p, connected: true, accountLabel: "links.accountLinked" } : p
         )
       );
     } finally {
@@ -97,14 +99,14 @@ export default function LinksPage() {
               <Link2 className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground tracking-tight">Links</h1>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">{t("links.title")}</h1>
               <p className="text-muted-foreground mt-0.5">
-                Connect your accounts from supported platforms.
+                {t("links.subtitle")}
               </p>
             </div>
             <Badge variant="outline" className="ml-auto gap-1 border-primary/40 text-primary">
               <Sparkles className="w-3.5 h-3.5" />
-              Tournaments & validation
+              {t("links.tournamentsValidation")}
             </Badge>
           </div>
         </motion.div>
@@ -170,7 +172,7 @@ export default function LinksPage() {
                           )}
                         </div>
                         <CardDescription className="text-base mt-1">
-                          {p.description}
+                          {t(p.descriptionKey)}
                         </CardDescription>
                         {p.connected && p.accountLabel && (
                           <motion.p
@@ -181,7 +183,7 @@ export default function LinksPage() {
                             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-success/20">
                               <Check className="h-3.5 w-3.5" />
                             </span>
-                            {p.accountLabel}
+                            {t(p.accountLabel)}
                           </motion.p>
                         )}
                       </div>
@@ -194,7 +196,7 @@ export default function LinksPage() {
                             disabled={connecting === p.id}
                             className="w-full sm:w-auto border-muted-foreground/30"
                           >
-                            {connecting === p.id ? "…" : "Disconnect"}
+                            {connecting === p.id ? "…" : t("common.disconnect")}
                           </Button>
                         ) : (
                           <Button
@@ -206,12 +208,12 @@ export default function LinksPage() {
                             {connecting === p.id ? (
                               <>
                                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                Connecting…
+                                {t("common.connecting")}
                               </>
                             ) : (
                               <>
                                 <ExternalLink className="w-4 h-4" />
-                                Connect
+                                {t("common.connect")}
                               </>
                             )}
                           </Button>
@@ -231,8 +233,7 @@ export default function LinksPage() {
           transition={{ delay: 0.3 }}
           className="mt-10 text-sm text-muted-foreground max-w-2xl"
         >
-          More platforms will be added as we expand. Linked accounts are used only for tournament
-          registration and match validation.
+          {t("links.morePlatforms")}
         </motion.p>
       </div>
     </ProtectedRoute>

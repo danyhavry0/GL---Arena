@@ -109,9 +109,19 @@ export default function BannerCarousel({
         </motion.div>
       </AnimatePresence>
 
-      {/* Gradient metallico uniforme su tutti i lati */}
-      <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/70 z-20 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background/70 z-20 pointer-events-none" />
+      {/* Bordo sfumato: vignetta che fa sfumare il contenuto verso i bordi */}
+      <div
+        className="absolute inset-0 z-20 pointer-events-none rounded-lg"
+        style={{
+          background: `
+            linear-gradient(to right, hsl(var(--background)) 0%, transparent 45%),
+            linear-gradient(to left, hsl(var(--background)) 0%, transparent 45%),
+            linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 45%),
+            linear-gradient(to top, hsl(var(--background)) 0%, transparent 45%)
+          `,
+        }}
+        aria-hidden
+      />
 
       {/* Controlli di navigazione - mostrati solo se ci sono più immagini */}
       {images.length > 1 && (

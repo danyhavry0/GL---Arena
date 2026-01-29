@@ -5,8 +5,10 @@ import { supabase } from "@/lib/supabaseClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useTranslation } from "@/contexts/LocaleContext";
 
 export default function ProfilePage() {
+  const { t, locale } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ export default function ProfilePage() {
       if (updateError) {
         setError(updateError.message);
       } else {
-        setSuccess("Profile updated successfully!");
+        setSuccess("profile.profileUpdated");
         // Aggiorna i dati locali
         const { data } = await supabase
           .from("users")
@@ -102,7 +104,7 @@ export default function ProfilePage() {
           <div className="text-center">
             <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
             <p className="text-sm text-muted-foreground">
-              Loading...
+              {t("common.loading")}
             </p>
           </div>
         </div>
@@ -110,10 +112,10 @@ export default function ProfilePage() {
         <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground tracking-tight">
-          User Profile
+          {t("profile.title")}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Manage your account information
+          {t("profile.manageInfo")}
         </p>
       </div>
 
@@ -123,7 +125,7 @@ export default function ProfilePage() {
           {/* Email (read-only) */}
           <div>
             <label className="block text-sm font-medium text-foreground">
-              Email
+              {t("profile.email")}
             </label>
             <input
               type="email"
@@ -132,55 +134,55 @@ export default function ProfilePage() {
               className="mt-1 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground"
             />
             <p className="mt-1 text-xs text-muted-foreground">
-              Email cannot be modified
+              {t("profile.emailCannotModify")}
             </p>
           </div>
 
           {/* Username */}
           <div>
             <label className="block text-sm font-medium text-foreground">
-              Username
+              {t("profile.username")}
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="username"
+              placeholder={t("profile.usernamePlaceholder")}
             />
           </div>
 
           {/* Full Name */}
           <div>
             <label className="block text-sm font-medium text-foreground">
-              Full Name
+              {t("profile.fullName")}
             </label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="Full Name"
+              placeholder={t("profile.fullNamePlaceholder")}
             />
           </div>
 
           {/* Avatar URL */}
           <div>
             <label className="block text-sm font-medium text-foreground">
-              Avatar URL
+              {t("profile.avatarUrl")}
             </label>
             <input
               type="url"
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
               className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="https://example.com/avatar.png"
+              placeholder={t("profile.avatarUrlPlaceholder")}
             />
             {avatarUrl && (
               <div className="mt-2">
                 <img
                   src={avatarUrl}
-                  alt="Avatar preview"
+                  alt={t("profile.avatarPreview")}
                   className="h-20 w-20 rounded-full object-cover"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
@@ -198,7 +200,7 @@ export default function ProfilePage() {
           )}
           {success && (
             <div className="rounded-md bg-success/10 border border-success/50 p-3 text-sm text-success">
-              {success}
+              {t(success)}
             </div>
           )}
 
@@ -209,7 +211,7 @@ export default function ProfilePage() {
               disabled={saving}
               variant="default"
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? t("common.saving") : t("common.saveChanges")}
             </Button>
           </div>
         </form>
@@ -221,24 +223,24 @@ export default function ProfilePage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="text-lg font-medium">
-              Account Information
+              {t("profile.accountInfo")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
               <div>
                 <span className="font-medium text-foreground">
-                  Member since:
-                </span>{" "}
+                  {t("profile.memberSince")}{" "}
+                </span>
                 <span className="text-muted-foreground">
                   {userData.created_at
-                    ? new Date(userData.created_at).toLocaleDateString("it-IT")
+                    ? new Date(userData.created_at).toLocaleDateString(locale === "it" ? "it-IT" : "en-US")
                     : "N/A"}
                 </span>
               </div>
               {userData.is_admin && (
                 <div className="rounded-md bg-primary/10 border border-primary/50 p-2 text-sm text-primary">
-                  ⚡ Administrator Account
+                  ⚡ {t("profile.administratorAccount")}
                 </div>
               )}
             </div>
