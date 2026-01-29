@@ -1,9 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Trophy } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showRegisterForm, setShowRegisterForm] = useState(false);
@@ -56,6 +62,9 @@ export default function Home() {
 
       const body = await res.json();
       console.log("Utente corrente:", body.user);
+      
+      // Redirect alla dashboard dopo login riuscito
+      router.push("/dashboard");
     } catch (e) {
       console.error(e);
       setError("Errore imprevisto durante il login");
@@ -63,6 +72,21 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  // Verifica se l'utente è già autenticato
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      
+      if (session) {
+        router.push("/dashboard");
+      }
+    };
+    
+    checkSession();
+  }, [router]);
 
   const handleRegister = async () => {
     setLoading(true);
@@ -107,137 +131,181 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full max-w-md flex-col gap-6 rounded-xl bg-white p-8 shadow-lg dark:bg-zinc-900">
-        <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
-          Login Supabase (JWT)
-        </h1>
+    <div className="flex min-h-screen items-center justify-center bg-background font-sans">
+      <motion.main
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="flex w-full max-w-md flex-col gap-6"
+      >
+        <Card className="border-primary/50 shadow-xl">
+          <CardHeader className="text-center space-y-3">
+            <div className="flex items-center justify-center gap-3">
+              <Trophy className="w-7 h-7 text-primary" />
+              <CardTitle className="text-2xl font-semibold tracking-tight">GL-Arena</CardTitle>
+            </div>
+            <CardDescription>
+              Accedi alla piattaforma competitiva per tornei esports
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
 
-        <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-          Email
-          <input
-            type="email"
-            className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-black outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-          />
-        </label>
-
-        <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-          Password
-          <input
-            type="password"
-            className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-black outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-          />
-        </label>
-
-        {error && (
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        )}
-        {success && (
-          <p className="text-sm text-emerald-600 dark:text-emerald-400">
-            {success}
-          </p>
-        )}
-
-        <button
-          type="button"
-          onClick={handleLogin}
-          disabled={loading}
-          className="mt-2 h-11 rounded-md bg-black text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400 dark:bg-zinc-100 dark:text-black dark:hover:bg-white"
-        >
-          {loading ? "Accesso in corso..." : "Accedi"}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setShowRegisterForm((prev) => !prev)}
-          className="h-11 text-sm font-medium text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
-        >
-          {showRegisterForm ? "Nascondi registrazione" : "Crea nuovo account"}
-        </button>
-
-        {showRegisterForm && (
-          <section className="mt-4 flex flex-col gap-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-            <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
-              Registrazione nuovo account
-            </h2>
-
-            <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-              Username
-              <input
-                type="text"
-                className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-black outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
-                value={registerUsername}
-                onChange={(e) => setRegisterUsername(e.target.value)}
-                placeholder="username"
-              />
-            </label>
-
-            <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-              Full name
-              <input
-                type="text"
-                className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-black outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
-                value={registerFullName}
-                onChange={(e) => setRegisterFullName(e.target.value)}
-                placeholder="Nome cognome"
-              />
-            </label>
-
-            <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-              Avatar URL
-              <input
-                type="url"
-                className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-black outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
-                value={registerAvatarUrl}
-                onChange={(e) => setRegisterAvatarUrl(e.target.value)}
-                placeholder="https://example.com/avatar.png"
-              />
-            </label>
-
-            <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+            <label className="flex flex-col gap-1 text-sm font-medium">
               Email
               <input
                 type="email"
-                className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-black outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
-                value={registerEmail}
-                onChange={(e) => setRegisterEmail(e.target.value)}
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
               />
             </label>
 
-            <label className="flex flex-col gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+            <label className="flex flex-col gap-1 text-sm font-medium">
               Password
               <input
                 type="password"
-                className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-black outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
-                value={registerPassword}
-                onChange={(e) => setRegisterPassword(e.target.value)}
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
               />
             </label>
 
-            <button
-              type="button"
-              onClick={handleRegister}
-              disabled={loading}
-              className="mt-2 h-11 rounded-md bg-black text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400 dark:bg-zinc-100 dark:text-black dark:hover:bg-white"
-            >
-              {loading ? "Invio dati..." : "Conferma registrazione"}
-            </button>
-          </section>
-        )}
+            {error && (
+              <div className="rounded-md bg-destructive/10 border border-destructive/50 p-3">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
+            {success && (
+              <div className="rounded-md bg-success/10 border border-success/50 p-3">
+                <p className="text-sm text-success">{success}</p>
+              </div>
+            )}
 
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Dopo il login vedrai il JWT e l&apos;utente corrente in{" "}
-          <code>console.log</code> (DevTools del browser).
-        </p>
-      </main>
+            <Button
+              type="button"
+              onClick={handleLogin}
+              disabled={loading}
+              variant="gaming"
+              className="w-full"
+              size="lg"
+            >
+              {loading ? (
+                <>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                  />
+                  Accesso in corso...
+                </>
+              ) : (
+                "Accedi"
+              )}
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => setShowRegisterForm((prev) => !prev)}
+              variant="outline"
+              className="w-full"
+            >
+              {showRegisterForm ? "Nascondi registrazione" : "Crea nuovo account"}
+            </Button>
+
+            {showRegisterForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="flex flex-col gap-4 border-t border-border pt-4 mt-4"
+              >
+                <h2 className="text-lg font-semibold text-foreground">
+                  Registrazione nuovo account
+                </h2>
+
+                <label className="flex flex-col gap-1 text-sm font-medium">
+                  Username
+                  <input
+                    type="text"
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    value={registerUsername}
+                    onChange={(e) => setRegisterUsername(e.target.value)}
+                    placeholder="username"
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1 text-sm font-medium">
+                  Full name
+                  <input
+                    type="text"
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    value={registerFullName}
+                    onChange={(e) => setRegisterFullName(e.target.value)}
+                    placeholder="Nome cognome"
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1 text-sm font-medium">
+                  Avatar URL
+                  <input
+                    type="url"
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    value={registerAvatarUrl}
+                    onChange={(e) => setRegisterAvatarUrl(e.target.value)}
+                    placeholder="https://example.com/avatar.png"
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1 text-sm font-medium">
+                  Email
+                  <input
+                    type="email"
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    placeholder="you@example.com"
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1 text-sm font-medium">
+                  Password
+                  <input
+                    type="password"
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    value={registerPassword}
+                    onChange={(e) => setRegisterPassword(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </label>
+
+                <Button
+                  type="button"
+                  onClick={handleRegister}
+                  disabled={loading}
+                  variant="gaming"
+                  className="w-full"
+                  size="lg"
+                >
+                  {loading ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                      />
+                      Invio dati...
+                    </>
+                  ) : (
+                    "Conferma registrazione"
+                  )}
+                </Button>
+              </motion.div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.main>
     </div>
   );
 }
