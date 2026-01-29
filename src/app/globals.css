@@ -4,6 +4,7 @@
   :root {
     /* Metallic Theme - Blue & Gray - Dark Blue Background */
     --background: 220 25% 10%; /* Dark blue-gray, not brown */
+    --content: 220 25% 14%; /* Slightly lighter for main content area */
     --foreground: 220 15% 95%; /* Light gray-white, not yellow */
     
     /* Primary - Light Metallic Blue */
@@ -49,6 +50,7 @@
 
 @theme inline {
   --color-background: hsl(var(--background));
+  --color-content: hsl(var(--content));
   --color-foreground: hsl(var(--foreground));
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

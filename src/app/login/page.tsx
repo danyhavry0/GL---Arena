@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Trophy } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import { normalizeEmail } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [showRegisterForm, setShowRegisterForm] = useState(false);
 
@@ -23,47 +24,42 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [resendingEmail, setResendingEmail] = useState(false);
+  /** Email da usare per "Resend confirmation", quando login con username e email non confermata. */
+  const [emailForResend, setEmailForResend] = useState<string | null>(null);
 
   const handleLogin = async () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setEmailForResend(null);
 
     try {
-      // 1) Login -> Supabase crea una sessione con JWT (access_token)
-      const { data, error: signInError } = await supabase.auth.signInWithPassword(
-        {
-          email,
-          password,
-        }
-      );
-
-      if (signInError || !data.session) {
-        setError(signInError?.message ?? "Login failed");
-        return;
-      }
-
-      const accessToken = data.session.access_token;
-      console.log("JWT access_token:", accessToken);
-
-      // 2) Chiamata alla nostra API /api/current-user passando il JWT
-      const res = await fetch("/api/current-user", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login: login.trim(), password }),
       });
 
+      const body = await res.json().catch(() => null);
+
       if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        console.error("Errore API current-user:", body ?? res.statusText);
-        setError("Error retrieving current user");
+        setError(body?.error ?? "Login failed");
+        if (body?.emailNotConfirmed && body?.email) setEmailForResend(body.email);
         return;
       }
 
-      const body = await res.json();
-      console.log("Utente corrente:", body.user);
-      
-      // Redirect alla dashboard dopo login riuscito
+      const { access_token, refresh_token } = body;
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+
+      if (sessionError) {
+        setError("Session error. Please try again.");
+        return;
+      }
+
       router.push("/dashboard");
     } catch (e) {
       console.error(e);
@@ -100,7 +96,13 @@ export default function LoginPage() {
         return;
       }
 
-      setSuccess("Registration completed. You can now sign in.");
+      // Mostra messaggio appropriato in base allo stato della conferma email
+      if (body.requiresEmailConfirmation) {
+        setSuccess("Registration successful! Please check your email to confirm your account before signing in.");
+      } else {
+        setSuccess("Registration completed. You can now sign in.");
+      }
+      
       setRegisterUsername("");
       setRegisterFullName("");
       setRegisterAvatarUrl("");
@@ -136,13 +138,14 @@ export default function LoginPage() {
           <CardContent className="space-y-4">
 
             <label className="flex flex-col gap-1 text-sm font-medium">
-              Email
+              Email or username
               <input
-                type="email"
+                type="text"
+                autoComplete="username"
                 className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                value={login}
+                onChange={(e) => setLogin(e.target.value)}
+                placeholder="you@example.com or username"
               />
             </label>
 
@@ -150,6 +153,7 @@ export default function LoginPage() {
               Password
               <input
                 type="password"
+                autoComplete="current-password"
                 className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -160,6 +164,38 @@ export default function LoginPage() {
             {error && (
               <div className="rounded-md bg-destructive/10 border border-destructive/50 p-3">
                 <p className="text-sm text-destructive">{error}</p>
+                {error.includes("verify your email") && (() => {
+                  const emailToResend = emailForResend ?? (login.includes("@") ? normalizeEmail(login) : null);
+                  return emailToResend ? (
+                    <button
+                      onClick={async () => {
+                        setResendingEmail(true);
+                        try {
+                          const res = await fetch("/api/resend-confirmation", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ email: emailToResend }),
+                          });
+                          const data = await res.json();
+                          if (res.ok) {
+                            setSuccess(data.message);
+                            setError(null);
+                          } else {
+                            setError(data.error ?? "Failed to resend confirmation email");
+                          }
+                        } catch (e) {
+                          setError("Failed to resend confirmation email");
+                        } finally {
+                          setResendingEmail(false);
+                        }
+                      }}
+                      disabled={resendingEmail}
+                      className="mt-2 text-sm text-primary hover:underline disabled:opacity-50"
+                    >
+                      {resendingEmail ? "Sending..." : "Resend confirmation email"}
+                    </button>
+                  ) : null;
+                })()}
               </div>
             )}
             {success && (

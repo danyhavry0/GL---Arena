@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
+import { normalizeEmail } from "@/lib/utils";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
@@ -13,11 +14,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const emailNormalized = normalizeEmail(email);
+    const usernameTrimmed = typeof username === "string" ? username.trim() : "";
+
+    // 0) Username univoco: se fornito, verifica che non esista già (case-insensitive)
+    if (usernameTrimmed) {
+      const { data: existing } = await supabase
+        .from("users")
+        .select("id")
+        .ilike("username", usernameTrimmed)
+        .limit(1)
+        .maybeSingle();
+
+      if (existing) {
+        return NextResponse.json(
+          { error: "Username already taken" },
+          { status: 400 }
+        );
+      }
+    }
+
     // 1) Crea l'utente in Supabase Auth (gestisce lui hash e sessioni)
+    // Con email confirmation abilitata, signUp() invia automaticamente l'email di conferma
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp(
       {
-        email,
+        email: emailNormalized,
         password,
+        options: {
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+        },
       }
     );
 
@@ -37,8 +62,8 @@ export async function POST(req: NextRequest) {
       .from("users")
       .insert({
         id: authUser.id, // usa lo stesso id di auth.users
-        email,
-        username: username ?? null,
+        email: emailNormalized,
+        username: usernameTrimmed || null,
         full_name: full_name ?? null,
         avatar_url: avatar_url ?? null,
         password_hash: passwordHash, // qui salviamo già l'hash, NON la password in chiaro
@@ -54,8 +79,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 3) Controlla se l'email è stata confermata
+    // Se email confirmation è abilitata, session sarà null fino a conferma
+    const emailConfirmed = signUpData.session !== null;
+    const requiresEmailConfirmation = !emailConfirmed;
+
     return NextResponse.json(
-      { message: "Registration completed", userId: authUser.id },
+      { 
+        message: requiresEmailConfirmation 
+          ? "Registration successful. Please check your email to confirm your account before signing in."
+          : "Registration completed",
+        userId: authUser.id,
+        emailConfirmed,
+        requiresEmailConfirmation,
+      },
       { status: 201 }
     );
   } catch (error) {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Trophy, User, LayoutDashboard, Settings, LogOut, Key } from "lucide-react";
+import { Trophy, User, LayoutDashboard, Settings, LogOut, Key, Link2 } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
@@ -119,6 +119,12 @@ export default function DashboardLayout({
                         <span>Profile Settings</span>
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/links" className="flex items-center cursor-pointer">
+                        <Link2 className="mr-2 h-4 w-4" />
+                        <span>Links</span>
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleChangePassword} className="cursor-pointer">
                       <Key className="mr-2 h-4 w-4" />
                       <span>Change Password</span>
@@ -142,8 +148,8 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-1">{children}</main>
+        {/* Main Content - slightly lighter than top bar */}
+        <main className="flex-1 bg-content">{children}</main>
 
         {/* Footer */}
         <footer className="border-t border-border bg-card/50">
