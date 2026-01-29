@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Trophy, User, BarChart3 } from "lucide-react";
-import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import BannerCarousel from "@/components/BannerCarousel";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -47,7 +47,7 @@ export default function DashboardPage() {
         <div className="text-center">
           <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
           <p className="text-sm text-muted-foreground">
-            Caricamento...
+            Loading...
           </p>
         </div>
       </div>
@@ -62,38 +62,16 @@ export default function DashboardPage() {
         transition={{ duration: 0.5 }}
         className="mb-8"
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="relative w-full h-[28rem] md:h-[36rem] lg:h-[44rem] rounded-lg overflow-hidden bg-muted"
-        >
-          {/* Background blur dell'immagine per riempire tutti gli spazi - più intenso */}
-          <Image
-            src="/images/banner4.jpg"
-            alt="GL-Arena Banner Background"
-            fill
-            className="object-cover blur-3xl opacity-50 scale-125"
-            priority
-            sizes="100vw"
-            aria-hidden="true"
+        <div className="relative">
+          <BannerCarousel
+            images={[
+              { src: "/images/banner.jpg", alt: "GL-Arena Banner" },
+            ]}
+            autoPlay={false}
           />
-          {/* Immagine principale */}
-          <Image
-            src="/images/banner4.jpg"
-            alt="GL-Arena Banner"
-            fill
-            className="object-cover object-center relative z-10"
-            priority
-            sizes="100vw"
-          />
-          {/* Gradient metallico uniforme su tutti i lati (orizzontale) */}
-          <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/70 z-20 pointer-events-none" />
-          {/* Gradient metallico uniforme su tutti i lati (verticale) */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background/70 z-20 pointer-events-none" />
           
           {/* Testo overlay */}
-          <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -101,15 +79,16 @@ export default function DashboardPage() {
               className="text-center px-4"
             >
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 drop-shadow-lg">
-                La battaglia sta iniziando
+                The battle is beginning
               </h2>
               <p className="text-lg md:text-xl lg:text-2xl text-foreground/90 font-medium drop-shadow-md mb-6">
-                Prenota il tuo posto
+                Reserve your spot
               </p>
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
+                className="pointer-events-auto"
               >
                 <button
                   onClick={() => {
@@ -118,12 +97,12 @@ export default function DashboardPage() {
                   }}
                   className="px-8 py-3 text-base md:text-lg font-medium text-foreground border-2 border-primary/60 bg-background/20 backdrop-blur-sm rounded-md hover:border-primary hover:bg-primary/10 transition-all"
                 >
-                  Prenota Ticket
+                  Reserve Ticket
                 </button>
               </motion.div>
             </motion.div>
           </div>
-        </motion.div>
+        </div>
       </motion.div>
 
       {/* Sezione Tornei */}
@@ -141,15 +120,15 @@ export default function DashboardPage() {
                   <Trophy className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-semibold">Tornei</CardTitle>
+                  <CardTitle className="text-2xl font-semibold">Tournaments</CardTitle>
                   <CardDescription className="text-base mt-1">
-                    Visualizza e partecipa ai tornei disponibili
+                    View and participate in available tournaments
                   </CardDescription>
                 </div>
               </div>
               <Link href="/dashboard/tournaments">
                 <Button variant="outline" size="sm">
-                  Vedi tutti
+                  View All
                 </Button>
               </Link>
             </div>
@@ -158,10 +137,10 @@ export default function DashboardPage() {
             <div className="text-center py-12">
               <Trophy className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
               <p className="text-muted-foreground text-lg">
-                Nessun torneo disponibile al momento
+                No tournaments available at the moment
               </p>
               <p className="text-muted-foreground/70 text-sm mt-2">
-                I nuovi tornei verranno visualizzati qui
+                New tournaments will be displayed here
               </p>
             </div>
           </CardContent>
@@ -183,10 +162,10 @@ export default function DashboardPage() {
                   <div className="p-2.5 rounded-lg bg-secondary/10 group-hover:bg-secondary/15 transition-colors">
                     <User className="w-5 h-5 text-secondary" />
                   </div>
-                  <CardTitle className="text-lg font-medium">Profilo</CardTitle>
+                  <CardTitle className="text-lg font-medium">Profile</CardTitle>
                 </div>
                 <CardDescription className="text-sm text-muted-foreground">
-                  Gestisci il tuo profilo e le impostazioni
+                  Manage your profile and settings
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -205,10 +184,10 @@ export default function DashboardPage() {
                   <div className="p-2.5 rounded-lg bg-secondary/10 group-hover:bg-secondary/15 transition-colors">
                     <User className="w-5 h-5 text-secondary" />
                   </div>
-                  <CardTitle className="text-lg font-medium">Profilo</CardTitle>
+                  <CardTitle className="text-lg font-medium">Profile</CardTitle>
                 </div>
                 <CardDescription className="text-sm text-muted-foreground">
-                  Gestisci il tuo profilo e le impostazioni
+                  Manage your profile and settings
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -226,10 +205,10 @@ export default function DashboardPage() {
                 <div className="p-2.5 rounded-lg bg-muted">
                   <BarChart3 className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <CardTitle className="text-lg font-medium text-muted-foreground">Statistiche</CardTitle>
+                <CardTitle className="text-lg font-medium text-muted-foreground">Statistics</CardTitle>
               </div>
               <CardDescription className="text-sm text-muted-foreground">
-                Le tue statistiche di gioco (presto disponibile)
+                Your game statistics (coming soon)
               </CardDescription>
             </CardHeader>
           </Card>

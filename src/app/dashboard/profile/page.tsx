@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -58,7 +59,7 @@ export default function ProfilePage() {
       } = await supabase.auth.getSession();
 
       if (!session) {
-        setError("Sessione non valida");
+        setError("Invalid session");
         return;
       }
 
@@ -75,7 +76,7 @@ export default function ProfilePage() {
       if (updateError) {
         setError(updateError.message);
       } else {
-        setSuccess("Profilo aggiornato con successo!");
+        setSuccess("Profile updated successfully!");
         // Aggiorna i dati locali
         const { data } = await supabase
           .from("users")
@@ -87,34 +88,32 @@ export default function ProfilePage() {
         }
       }
     } catch (err) {
-      setError("Errore durante l'aggiornamento del profilo");
+      setError("Error updating profile");
       console.error(err);
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
-          <p className="text-sm text-muted-foreground">
-            Caricamento...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
+    <ProtectedRoute>
+      {loading ? (
+        <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
+            <p className="text-sm text-muted-foreground">
+              Loading...
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground tracking-tight">
-          Profilo Utente
+          User Profile
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Gestisci le informazioni del tuo account
+          Manage your account information
         </p>
       </div>
 
@@ -133,7 +132,7 @@ export default function ProfilePage() {
               className="mt-1 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground"
             />
             <p className="mt-1 text-xs text-muted-foreground">
-              L&apos;email non può essere modificata
+              Email cannot be modified
             </p>
           </div>
 
@@ -154,14 +153,14 @@ export default function ProfilePage() {
           {/* Full Name */}
           <div>
             <label className="block text-sm font-medium text-foreground">
-              Nome Completo
+              Full Name
             </label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="Nome Cognome"
+              placeholder="Full Name"
             />
           </div>
 
@@ -210,7 +209,7 @@ export default function ProfilePage() {
               disabled={saving}
               variant="default"
             >
-              {saving ? "Salvataggio..." : "Salva Modifiche"}
+              {saving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>
@@ -222,14 +221,14 @@ export default function ProfilePage() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="text-lg font-medium">
-              Informazioni Account
+              Account Information
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
               <div>
                 <span className="font-medium text-foreground">
-                  Membro dal:
+                  Member since:
                 </span>{" "}
                 <span className="text-muted-foreground">
                   {userData.created_at
@@ -239,13 +238,15 @@ export default function ProfilePage() {
               </div>
               {userData.is_admin && (
                 <div className="rounded-md bg-primary/10 border border-primary/50 p-2 text-sm text-primary">
-                  ⚡ Account Amministratore
+                  ⚡ Administrator Account
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
       )}
-    </div>
+        </div>
+      )}
+    </ProtectedRoute>
   );
 }

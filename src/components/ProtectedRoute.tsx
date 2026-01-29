@@ -51,7 +51,7 @@ export default function ProtectedRoute({
         <div className="text-center">
           <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
           <p className="text-sm text-muted-foreground">
-            Caricamento...
+            Loading...
           </p>
         </div>
       </div>

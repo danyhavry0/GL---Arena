@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: "Email e password sono obbligatorie" },
+        { error: "Email and password are required" },
         { status: 400 }
       );
     }
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     if (signUpError || !signUpData.user) {
       return NextResponse.json(
-        { error: signUpError?.message ?? "Registrazione fallita" },
+        { error: signUpError?.message ?? "Registration failed" },
         { status: 400 }
       );
     }
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     if (insertError) {
       return NextResponse.json(
         {
-          error: "Utente creato in Auth ma non in public.users",
+          error: "User created in Auth but not in public.users",
           details: insertError.message,
         },
         { status: 500 }
@@ -55,13 +55,13 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { message: "Registrazione completata", userId: authUser.id },
+      { message: "Registration completed", userId: authUser.id },
       { status: 201 }
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Errore imprevisto durante la registrazione" },
+      { error: "Unexpected error during registration" },
       { status: 500 }
     );
   }

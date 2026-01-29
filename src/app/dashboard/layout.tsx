@@ -3,11 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Trophy, User, LayoutDashboard } from "lucide-react";
+import { Trophy, User, LayoutDashboard, Settings, LogOut, Key } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function DashboardLayout({
   children,
@@ -48,15 +55,23 @@ export default function DashboardLayout({
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/tournaments", label: "Tornei", icon: Trophy },
-    { href: "/dashboard/profile", label: "Profilo", icon: User },
+    { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
   ];
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
+
+  const handleChangePassword = () => {
+    // TODO: Implement change password functionality
+    alert("Change password functionality will be implemented soon.");
+  };
+
   return (
-    <ProtectedRoute>
-      <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
         {/* Header */}
-        <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+        <header className="bg-card/80 backdrop-blur-sm sticky top-0 z-50 shadow-md">
           <div className="flex w-full items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-8">
               <Link href="/dashboard" className="flex items-center gap-2.5 group">
@@ -86,17 +101,40 @@ export default function DashboardLayout({
             </div>
             <div className="flex items-center gap-3">
               {user ? (
-                <Link href="/dashboard/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                  <User className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-medium text-foreground">
-                    {userData?.username || user.email?.split("@")[0] || "Utente"}
-                  </span>
-                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none">
+                      <User className="w-5 h-5 text-primary" />
+                      <span className="text-sm font-medium text-foreground">
+                        {userData?.username || user.email?.split("@")[0] || "User"}
+                      </span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/profile" className="flex items-center cursor-pointer">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Profile Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleChangePassword} className="cursor-pointer">
+                      <Key className="mr-2 h-4 w-4" />
+                      <span>Change Password</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
-                <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <Link href="/login" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                   <User className="w-5 h-5 text-muted-foreground" />
                   <span className="text-sm font-medium text-muted-foreground">
-                    Accedi
+                    Sign In
                   </span>
                 </Link>
               )}
@@ -111,11 +149,10 @@ export default function DashboardLayout({
         <footer className="border-t border-border bg-card/50">
           <div className="w-full px-4 py-4 sm:px-6 lg:px-8">
             <p className="text-center text-xs text-muted-foreground">
-              © 2026 GL-Arena. Piattaforma competitiva per tornei esports.
+              © 2026 GL-Arena. Competitive platform for esports tournaments.
             </p>
           </div>
         </footer>
       </div>
-    </ProtectedRoute>
   );
 }

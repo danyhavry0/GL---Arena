@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GL-Arena | Piattaforma Competitiva per Tornei Esports",
-  description: "GL-Arena è una piattaforma competitiva dedicata all'organizzazione di tornei esports strutturati, con particolare attenzione al fair play e alla trasparenza.",
+  title: "GL-Arena | Competitive Platform for Esports Tournaments",
+  description: "GL-Arena is a competitive platform dedicated to organizing structured esports tournaments, with particular attention to fair play and transparency.",
 };
 
 export default function RootLayout({
@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="it" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
