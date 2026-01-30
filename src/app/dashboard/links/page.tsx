@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Link2, Check, ExternalLink, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -29,16 +30,42 @@ type Platform = {
 
 export default function LinksPage() {
   const { t } = useTranslation();
-  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState<PlatformId | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (session) setUser(session.user);
+      if (!session) {
+        setLoading(false);
+        return;
+      }
+
+      const { data: profile, error: profileErr } = await supabase
+        .from("users")
+        .select("riot_puuid, riot_summoner_name")
+        .eq("id", session.user.id)
+        .maybeSingle();
+
+      if (profileErr) console.error(profileErr);
+
+      setPlatforms((prev) =>
+        prev.map((p) =>
+          p.id === "riot"
+            ? {
+                ...p,
+                connected: !!profile?.riot_puuid,
+                accountLabel: profile?.riot_summoner_name ?? undefined,
+              }
+            : p
+        )
+      );
+
       setLoading(false);
     };
     fetchUser();
@@ -50,7 +77,7 @@ export default function LinksPage() {
       name: "Riot Games",
       tagline: "League of Legends",
       descriptionKey: "links.riotDescription",
-      iconSrc: "/images/riot-icon.jpg",
+      iconSrc: "/images/riot-icon.png",
       accent: "from-red-600 to-red-800",
       bgGradient: "from-red-500/10 via-transparent to-red-600/5",
       borderGlow: "hover:border-red-500/50 hover:shadow-[0_0_20px_rgba(220,38,38,0.15)]",
@@ -60,23 +87,57 @@ export default function LinksPage() {
   ]);
 
   const handleConnect = async (id: PlatformId) => {
-    setConnecting(id);
-    try {
-      await new Promise((r) => setTimeout(r, 800));
-      setPlatforms((prev) =>
-        prev.map((p) =>
-          p.id === id ? { ...p, connected: true, accountLabel: "links.accountLinked" } : p
-        )
-      );
-    } finally {
-      setConnecting(null);
+    setError(null);
+
+    if (id !== "riot") return;
+
+    if (!process.env.NEXT_PUBLIC_RIOT_OAUTH_CLIENT_ID) {
+      setError("Missing NEXT_PUBLIC_RIOT_OAUTH_CLIENT_ID. Configure your .env.local first.");
+      return;
     }
+
+    const state =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : String(Math.random()).slice(2);
+    sessionStorage.setItem("riot_oauth_state", state);
+
+    const redirectUri = `${window.location.origin}/dashboard/links/riot/callback`;
+    const params = new URLSearchParams({
+      response_type: "code",
+      client_id: process.env.NEXT_PUBLIC_RIOT_OAUTH_CLIENT_ID,
+      redirect_uri: redirectUri,
+      scope: "openid",
+      state,
+    });
+
+    window.location.href = `https://auth.riotgames.com/authorize?${params.toString()}`;
   };
 
   const handleDisconnect = async (id: PlatformId) => {
     setConnecting(id);
     try {
-      await new Promise((r) => setTimeout(r, 400));
+      setError(null);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user?.id) {
+        setError("You must be logged in to disconnect.");
+        return;
+      }
+
+      const { error: updErr } = await supabase
+        .from("users")
+        .update({ riot_puuid: null, riot_summoner_name: null })
+        .eq("id", session.user.id);
+
+      if (updErr) {
+        console.error(updErr);
+        setError("Failed to disconnect Riot account.");
+        return;
+      }
+
       setPlatforms((prev) =>
         prev.map((p) => (p.id === id ? { ...p, connected: false, accountLabel: undefined } : p))
       );
@@ -84,6 +145,13 @@ export default function LinksPage() {
       setConnecting(null);
     }
   };
+
+  useEffect(() => {
+    // optional: allow callback page to redirect back with ?linked=riot
+    const linked = searchParams.get("linked");
+    if (!linked) return;
+    router.replace("/dashboard/links");
+  }, [router, searchParams]);
 
   return (
     <ProtectedRoute>
@@ -121,6 +189,11 @@ export default function LinksPage() {
           </div>
         ) : (
           <div className="space-y-6 max-w-2xl">
+            {error && (
+              <div className="rounded-md bg-destructive/10 border border-destructive/50 p-3">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
             {platforms.map((p, i) => (
               <motion.div
                 key={p.id}
@@ -183,7 +256,7 @@ export default function LinksPage() {
                             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-success/20">
                               <Check className="h-3.5 w-3.5" />
                             </span>
-                            {t(p.accountLabel)}
+                            {p.accountLabel}
                           </motion.p>
                         )}
                       </div>
