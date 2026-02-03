@@ -2,49 +2,57 @@
 
 @layer base {
   :root {
-    /* Metallic Theme - Blue & Gray - Dark Blue Background */
-    --background: 220 25% 10%; /* Dark blue-gray, not brown */
-    --content: 220 25% 14%; /* Slightly lighter for main content area */
-    --foreground: 220 15% 95%; /* Light gray-white, not yellow */
+    /* Gaming Theme - Cyberpunk Blue & Purple */
+    --background: 225 30% 6%; /* Deep dark blue-black */
+    --content: 225 25% 9%; /* Slightly lighter for main content */
+    --foreground: 210 40% 98%; /* Crisp white */
     
-    /* Primary - Light Metallic Blue */
-    --primary: 200 95% 70%; /* #60a5fa - Light metallic blue */
-    --primary-foreground: 220 25% 10%;
+    /* Primary - Electric Cyan */
+    --primary: 190 95% 55%; /* Electric cyan/teal */
+    --primary-foreground: 225 30% 6%;
     
-    /* Secondary - Metallic Gray */
-    --secondary: 220 15% 65%; /* Metallic gray */
-    --secondary-foreground: 220 25% 10%;
+    /* Secondary - Purple/Violet */
+    --secondary: 270 70% 60%; /* Gaming purple */
+    --secondary-foreground: 225 30% 6%;
     
-    /* Accent - Brighter Metallic Blue */
-    --accent: 195 100% 75%; /* Bright metallic blue */
-    --accent-foreground: 220 25% 10%;
+    /* Accent - Neon Pink/Magenta */
+    --accent: 320 90% 60%; /* Neon magenta */
+    --accent-foreground: 225 30% 6%;
     
-    /* Destructive - Red (errori) */
-    --destructive: 0 84% 60%; /* #ef4444 */
-    --destructive-foreground: 220 15% 95%;
+    /* Destructive - Neon Red */
+    --destructive: 0 90% 55%; /* Bright neon red */
+    --destructive-foreground: 210 40% 98%;
     
-    /* Success - Green (vittorie) */
-    --success: 142 71% 45%; /* #22c55e */
+    /* Success - Neon Green */
+    --success: 150 80% 45%; /* Neon green */
     
-    /* Muted - Dark Metallic Gray */
-    --muted: 220 20% 15%; /* Dark blue-gray */
-    --muted-foreground: 220 15% 65%; /* Metallic gray */
+    /* Warning - Electric Orange */
+    --warning: 35 95% 55%;
     
-    /* Card - Dark Metallic Surface */
-    --card: 220 25% 12%; /* Dark blue-gray card */
-    --card-foreground: 220 15% 95%;
+    /* Muted - Dark Blue-Gray */
+    --muted: 225 20% 12%;
+    --muted-foreground: 215 20% 55%;
+    
+    /* Card - Glass-like Dark Surface */
+    --card: 225 25% 8%;
+    --card-foreground: 210 40% 98%;
     
     /* Popover */
-    --popover: 220 25% 12%;
-    --popover-foreground: 220 15% 95%;
+    --popover: 225 25% 10%;
+    --popover-foreground: 210 40% 98%;
     
-    /* Border & Input - Metallic Gray */
-    --border: 220 20% 25%; /* Metallic gray border */
-    --input: 220 20% 25%;
-    --ring: 200 95% 70%; /* Primary metallic blue */
+    /* Border & Input */
+    --border: 225 20% 18%;
+    --input: 225 20% 15%;
+    --ring: 190 95% 55%;
     
     /* Border radius */
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+    
+    /* Gaming specific colors */
+    --glow-primary: 190 95% 55%;
+    --glow-secondary: 270 70% 60%;
+    --glow-accent: 320 90% 60%;
   }
 }
 
@@ -62,34 +70,245 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Ensure no yellow/brown colors anywhere */
-* {
-  --tw-text-opacity: 1;
-}
-
-/* Override any potential yellow/amber colors */
-.text-yellow-500,
-.text-yellow-600,
-.text-amber-500,
-.text-amber-600,
-.bg-yellow-500,
-.bg-amber-500 {
-  color: hsl(var(--foreground)) !important;
-  background: hsl(var(--background)) !important;
-}
-
-/* Metallic utilities - Subtle metallic effects */
+/* Gaming utilities - Advanced effects */
 @layer utilities {
+  /* Text glow effects */
   .text-glow {
-    text-shadow: 0 0 6px hsl(var(--primary) / 0.3);
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3);
   }
   
+  .text-glow-secondary {
+    text-shadow: 0 0 10px hsl(var(--secondary) / 0.5), 0 0 20px hsl(var(--secondary) / 0.3);
+  }
+  
+  .text-glow-accent {
+    text-shadow: 0 0 10px hsl(var(--accent) / 0.5), 0 0 20px hsl(var(--accent) / 0.3);
+  }
+  
+  /* Box glow effects */
   .box-glow {
-    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.15), 0 2px 8px hsl(var(--primary) / 0.08);
+    box-shadow: 
+      0 0 0 1px hsl(var(--primary) / 0.2),
+      0 0 15px hsl(var(--primary) / 0.15),
+      0 0 30px hsl(var(--primary) / 0.1);
   }
   
+  .box-glow-hover {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  
+  .box-glow-hover:hover {
+    box-shadow: 
+      0 0 0 1px hsl(var(--primary) / 0.4),
+      0 0 20px hsl(var(--primary) / 0.25),
+      0 0 40px hsl(var(--primary) / 0.15);
+    border-color: hsl(var(--primary) / 0.5);
+  }
+  
+  /* Neon border effect */
+  .neon-border {
+    position: relative;
+    border: 1px solid hsl(var(--primary) / 0.3);
+    box-shadow: 
+      inset 0 0 20px hsl(var(--primary) / 0.05),
+      0 0 10px hsl(var(--primary) / 0.1);
+  }
+  
+  .neon-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.5),
+      transparent 40%,
+      transparent 60%,
+      hsl(var(--secondary) / 0.5)
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  
+  /* Metallic/glass border */
   .metallic-border {
     border-color: hsl(var(--border));
-    box-shadow: inset 0 1px 0 0 hsl(var(--primary) / 0.1);
+    background: linear-gradient(
+      135deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--card) / 0.8) 100%
+    );
+    box-shadow: 
+      inset 0 1px 0 0 hsl(var(--primary) / 0.1),
+      0 4px 20px hsl(var(--background) / 0.5);
+    backdrop-filter: blur(10px);
+  }
+  
+  /* Gradient backgrounds */
+  .bg-gaming-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--background)) 0%,
+      hsl(225 30% 10%) 50%,
+      hsl(var(--background)) 100%
+    );
+  }
+  
+  .bg-gaming-radial {
+    background: radial-gradient(
+      ellipse at top,
+      hsl(var(--primary) / 0.1) 0%,
+      transparent 50%
+    ), hsl(var(--background));
+  }
+  
+  /* Animated gradient border */
+  .animated-border {
+    position: relative;
+    background: hsl(var(--card));
+    border-radius: var(--radius);
+  }
+  
+  .animated-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      var(--border-angle, 0deg),
+      hsl(var(--primary)),
+      hsl(var(--secondary)),
+      hsl(var(--accent)),
+      hsl(var(--primary))
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: border-rotate 4s linear infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes border-rotate {
+    to {
+      --border-angle: 360deg;
+    }
+  }
+  
+  @property --border-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+  
+  /* Pulse glow animation */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 5px hsl(var(--primary) / 0.3), 0 0 10px hsl(var(--primary) / 0.2);
+    }
+    50% {
+      box-shadow: 0 0 15px hsl(var(--primary) / 0.5), 0 0 30px hsl(var(--primary) / 0.3);
+    }
+  }
+  
+  /* Shimmer effect */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--primary) / 0.1),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
+  /* Gaming card hover lift */
+  .card-hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .card-hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+      0 10px 40px hsl(var(--primary) / 0.15),
+      0 0 0 1px hsl(var(--primary) / 0.2);
+  }
+  
+  /* Cyber lines decoration */
+  .cyber-lines {
+    background-image: 
+      linear-gradient(90deg, hsl(var(--primary) / 0.03) 1px, transparent 1px),
+      linear-gradient(hsl(var(--primary) / 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  
+  /* Scan line effect */
+  .scan-lines {
+    position: relative;
+  }
+  
+  .scan-lines::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      hsl(var(--primary) / 0.03) 2px,
+      hsl(var(--primary) / 0.03) 4px
+    );
+    pointer-events: none;
+  }
+  
+  /* Focus ring gaming style */
+  .gaming-focus:focus-visible {
+    outline: none;
+    box-shadow: 
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--primary)),
+      0 0 20px hsl(var(--primary) / 0.5);
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .gradient-text-accent {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }

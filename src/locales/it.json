@@ -16,7 +16,8 @@
     "hideRegistration": "Nascondi registrazione",
     "createAccount": "Crea nuovo account",
     "resendConfirmation": "Invia di nuovo email di conferma",
-    "sending": "Invio..."
+    "sending": "Invio...",
+    "comingSoon": "Prossimamente"
   },
   "login": {
     "title": "GL-Arena",
@@ -58,7 +59,11 @@
     "profile": "Profilo",
     "profileDescription": "Gestisci profilo e impostazioni",
     "statistics": "Statistiche",
-    "statisticsDescription": "Le tue statistiche di gioco (in arrivo)"
+    "statisticsDescription": "Le tue statistiche di gioco (in arrivo)",
+    "gameLinks": "Link Giochi",
+    "gameLinksDescription": "Collega i tuoi account di gioco",
+    "teams": "I Miei Team",
+    "teamsDescription": "Gestisci i tuoi team per i tornei"
   },
   "profile": {
     "title": "Profilo utente",

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTranslation } from "@/contexts/LocaleContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import TeamSidebarFixed from "@/components/TeamSidebarFixed";
 
 export default function DashboardLayout({
   children,
@@ -29,6 +30,7 @@ export default function DashboardLayout({
   const [user, setUser] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   useEffect(() => {
     const getUser = async () => {
@@ -152,11 +154,21 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        {/* Main Content - slightly lighter than top bar */}
-        <main className="flex-1 bg-content">{children}</main>
+        {/* Main Content with Fixed Sidebar */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Main Content Area */}
+          <main className="flex-1 bg-content overflow-y-auto">{children}</main>
+          
+          {/* Fixed Team Sidebar on the Right */}
+          <TeamSidebarFixed
+            userId={user?.id}
+            isExpanded={sidebarExpanded}
+            onToggle={() => setSidebarExpanded(!sidebarExpanded)}
+          />
+        </div>
 
         {/* Footer */}
-        <footer className="border-t border-border bg-card/50">
+        <footer className="border-t border-border bg-card/50 flex-shrink-0">
           <div className="w-full px-4 py-4 sm:px-6 lg:px-8">
             <p className="text-center text-xs text-muted-foreground">
               {t("layout.footer")}
