@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -35,6 +35,15 @@ export default function LinksPage() {
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState<PlatformId | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showRiotFlow, setShowRiotFlow] = useState(false);
+  const [riotStep, setRiotStep] = useState<"summoner" | "email" | "code" | "success">("summoner");
+  const [riotSummonerName, setRiotSummonerName] = useState("");
+  const [riotEmail, setRiotEmail] = useState("");
+  const [riotCode, setRiotCode] = useState("");
+  const [riotGeneratedCode, setRiotGeneratedCode] = useState("");
+  const [riotFlowLoading, setRiotFlowLoading] = useState(false);
+  const [riotFlowMessage, setRiotFlowMessage] = useState<string | null>(null);
+  const [riotFlowError, setRiotFlowError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -91,27 +100,170 @@ export default function LinksPage() {
 
     if (id !== "riot") return;
 
-    if (!process.env.NEXT_PUBLIC_RIOT_OAUTH_CLIENT_ID) {
-      setError("Missing NEXT_PUBLIC_RIOT_OAUTH_CLIENT_ID. Configure your .env.local first.");
-      return;
+    // Start Riot email verification flow instead of OAuth redirect
+    setShowRiotFlow(true);
+    setRiotStep("summoner");
+    setRiotSummonerName("");
+    setRiotEmail("");
+    setRiotCode("");
+    setRiotGeneratedCode("");
+    setRiotFlowError(null);
+    setRiotFlowMessage(null);
+  };
+
+  const handleRiotSummonerSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setRiotFlowLoading(true);
+    setRiotFlowError(null);
+    setRiotFlowMessage(null);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const token = session?.access_token;
+      if (!token) {
+        setRiotFlowError("You must be logged in to connect your Riot account.");
+        return;
+      }
+
+      // Parse Riot ID in the form "Name#TAG"
+      const parts = riotSummonerName.split("#");
+      const gameName = parts[0]?.trim();
+      const tagLine = parts[1]?.trim();
+
+      if (!gameName || !tagLine) {
+        setRiotFlowError("Please enter your Riot ID in the format Name#TAG (e.g. The Brave#6464).");
+        return;
+      }
+
+      const res = await fetch("/api/riot/email-verification/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          gameName,
+          tagLine,
+          region: "euw1",
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(data?.error ?? "Failed to verify summoner with Riot API.");
+      }
+
+      setRiotGeneratedCode(data?.verificationCode ?? "");
+      setRiotFlowMessage("Summoner verified. Now enter your Riot email.");
+      setRiotStep("email");
+    } catch (e: any) {
+      setRiotFlowError(e?.message ?? "Unexpected error while verifying summoner.");
+    } finally {
+      setRiotFlowLoading(false);
     }
+  };
 
-    const state =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : String(Math.random()).slice(2);
-    sessionStorage.setItem("riot_oauth_state", state);
+  const handleRiotEmailSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setRiotFlowLoading(true);
+    setRiotFlowError(null);
+    setRiotFlowMessage(null);
 
-    const redirectUri = `${window.location.origin}/dashboard/links/riot/callback`;
-    const params = new URLSearchParams({
-      response_type: "code",
-      client_id: process.env.NEXT_PUBLIC_RIOT_OAUTH_CLIENT_ID,
-      redirect_uri: redirectUri,
-      scope: "openid",
-      state,
-    });
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    window.location.href = `https://auth.riotgames.com/authorize?${params.toString()}`;
+      const token = session?.access_token;
+      if (!token) {
+        setRiotFlowError("You must be logged in to connect your Riot account.");
+        return;
+      }
+
+      const res = await fetch("/api/riot/email-verification/send-verification-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          email: riotEmail.trim(),
+          verificationCode: riotGeneratedCode,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(data?.error ?? "Failed to send verification email.");
+      }
+
+      setRiotFlowMessage(
+        "Verification code sent to your email. Please check your inbox (and spam) and enter the code."
+      );
+      setRiotStep("code");
+    } catch (e: any) {
+      setRiotFlowError(e?.message ?? "Unexpected error while sending email.");
+    } finally {
+      setRiotFlowLoading(false);
+    }
+  };
+
+  const handleRiotCodeSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setRiotFlowLoading(true);
+    setRiotFlowError(null);
+    setRiotFlowMessage(null);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const token = session?.access_token;
+      if (!token) {
+        setRiotFlowError("You must be logged in to connect your Riot account.");
+        return;
+      }
+
+      const res = await fetch("/api/riot/email-verification/verify-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          verificationCode: riotCode.trim(),
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(data?.error ?? "Invalid or expired verification code.");
+      }
+
+      setRiotFlowMessage("Riot account verified successfully.");
+      setRiotStep("success");
+
+      // Mark Riot as connected locally
+      setPlatforms((prev) =>
+        prev.map((p) =>
+          p.id === "riot"
+            ? {
+                ...p,
+                connected: true,
+                accountLabel: riotSummonerName || p.accountLabel,
+              }
+            : p
+        )
+      );
+    } catch (e: any) {
+      setRiotFlowError(e?.message ?? "Unexpected error while verifying code.");
+    } finally {
+      setRiotFlowLoading(false);
+    }
   };
 
   const handleDisconnect = async (id: PlatformId) => {
@@ -297,6 +449,143 @@ export default function LinksPage() {
                 </Card>
               </motion.div>
             ))}
+          </div>
+        )}
+
+        {showRiotFlow && (
+          <div className="mt-8 max-w-2xl space-y-4">
+            <h2 className="text-xl font-semibold text-foreground">Riot email verification</h2>
+            <p className="text-sm text-muted-foreground">
+              Link your Riot account by verifying your summoner and email with a one-time code.
+            </p>
+
+            {riotFlowError && (
+              <div className="rounded-md bg-destructive/10 border border-destructive/50 p-3">
+                <p className="text-sm text-destructive">{riotFlowError}</p>
+              </div>
+            )}
+            {riotFlowMessage && (
+              <div className="rounded-md bg-primary/10 border border-primary/40 p-3">
+                <p className="text-sm text-primary">{riotFlowMessage}</p>
+              </div>
+            )}
+
+            {riotStep === "summoner" && (
+              <form onSubmit={handleRiotSummonerSubmit} className="space-y-3">
+                <label className="flex flex-col gap-1 text-sm font-medium text-foreground">
+                  Riot ID (Name#TAG)
+                  <input
+                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    value={riotSummonerName}
+                    onChange={(e) => setRiotSummonerName(e.target.value)}
+                    placeholder="e.g. The Brave#6464"
+                    disabled={riotFlowLoading}
+                    required
+                  />
+                </label>
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={riotFlowLoading || !riotSummonerName.trim()}>
+                    {riotFlowLoading ? "Verifying..." : "Verify Riot ID"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={riotFlowLoading}
+                    onClick={() => {
+                      setShowRiotFlow(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {riotStep === "email" && (
+              <form onSubmit={handleRiotEmailSubmit} className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Summoner: <span className="font-semibold">{riotSummonerName}</span>
+                </p>
+                <label className="flex flex-col gap-1 text-sm font-medium text-foreground">
+                  Riot email
+                  <input
+                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    type="email"
+                    value={riotEmail}
+                    onChange={(e) => setRiotEmail(e.target.value)}
+                    placeholder="your_riot_email@example.com"
+                    disabled={riotFlowLoading}
+                    required
+                  />
+                </label>
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={riotFlowLoading || !riotEmail.trim()}>
+                    {riotFlowLoading ? "Sending..." : "Send verification code"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={riotFlowLoading}
+                    onClick={() => setRiotStep("summoner")}
+                  >
+                    Back
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {riotStep === "code" && (
+              <form onSubmit={handleRiotCodeSubmit} className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  We sent a 6-digit code to <span className="font-semibold">{riotEmail}</span>.
+                </p>
+                <label className="flex flex-col gap-1 text-sm font-medium text-foreground">
+                  Verification code
+                  <input
+                    className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-lg tracking-[0.4em] text-center outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    value={riotCode}
+                    onChange={(e) => setRiotCode(e.target.value.slice(0, 6))}
+                    maxLength={6}
+                    placeholder="000000"
+                    disabled={riotFlowLoading}
+                    required
+                  />
+                </label>
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    disabled={riotFlowLoading || riotCode.trim().length !== 6}
+                  >
+                    {riotFlowLoading ? "Verifying..." : "Confirm code"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={riotFlowLoading}
+                    onClick={() => setRiotStep("email")}
+                  >
+                    Back
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {riotStep === "success" && (
+              <div className="space-y-3">
+                <p className="text-sm text-success font-medium">
+                  Your Riot account has been linked successfully.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowRiotFlow(false);
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
+            )}
           </div>
         )}
 

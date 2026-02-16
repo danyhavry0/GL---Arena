@@ -207,7 +207,7 @@ export default function LoginPage() {
       >
         <Card variant="gaming-neon" className="overflow-hidden relative">
           {/* Gradient border glow */}
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-violet-500 to-pink-500 opacity-20 blur-xl" />
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-violet-500 to-pink-500 opacity-20 blur-xl pointer-events-none" />
           {/* Top accent line */}
           <div className="h-1.5 bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500" />
           
